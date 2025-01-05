@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sticky-demo
+  namespace: sticky-demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sticky-demo
+  template:
+    metadata:
+      labels:
+        app: sticky-demo
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config

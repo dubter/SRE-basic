@@ -4,9 +4,81 @@
 Домашнее задание по разворачиванию Prometheus:
 - можно выполнить на локальном компьютере используя docker-compose, просто развернув prometheus из образа официальной документации https://prometheus.io/docs/prometheus/latest/installation/
 - можно выполнив команды представленные ниже на виртуальной машине
+```
+# Обновим зависимости
+sudo apt update && sudo apt install wget systemctl -y
+
+# Скачиваем Prometheus
+wget "https://github.com/prometheus/prometheus/releases/download/v2.37.0/prometheus-2.37.0.linux-amd64.tar.gz"
+
+# Распаковываем
+tar xvf prometheus-2.37.0.linux-amd64.tar.gz -C /tmp
+
+# Копируем бинарники
+sudo cp /tmp/prometheus-2.37.0.linux-amd64/prometheus /usr/local/bin/
+sudo cp /tmp/prometheus-2.37.0.linux-amd64/promtool /usr/local/bin/
+
+# Создаем папки
+sudo mkdir -p /etc/prometheus
+sudo mkdir /var/lib/prometheus
+
+# Копируем файлы
+sudo cp -r /tmp/prometheus-2.37.0.linux-amd64/consoles /etc/prometheus
+sudo cp -r /tmp/prometheus-2.37.0.linux-amd64/console_libraries /etc/prometheus
+
+# Создаем пользователя в системе без возможности логина (для безопасности)
+sudo useradd --no-create-home --shell /bin/false prometheus
+
+# Ставим правильного пользователя владельцем
+sudo chown prometheus:prometheus -R /etc/prometheus
+sudo chown prometheus:prometheus -R /var/lib/prometheus/
+
+# Создаем базовый конфиг
+sudo cat << EOF > /etc/prometheus/prometheus.yml
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:9090']
+EOF
+
+# Создаем инитскрипт для system.d
+sudo cat << EOF > /lib/systemd/system/prometheus.service
+
+[Unit]
+Description=Prometheus service
+
+[Service]
+User=prometheus
+Group=prometheus
+
+ExecStart=/usr/local/bin/prometheus --config.file /etc/prometheus/prometheus.yml --storage.tsdb.path /var/lib/prometheus/ --web.console.templates=/etc/prometheus/consoles --web.console.libraries=/etc/prometheus/console_libraries
+
+[Install]
+WantedBy=multi-user.target
+
+EOF
+
+# Релоадим демона, ставим в автозапуск и запускаем
+sudo systemctl daemon-reload
+sudo systemctl enable prometheus.service
+sudo systemctl start prometheus.service
+
+asdas
+```
+
+Теперь по адресу <ip>:9090 будет доступен Prometheus
+<ip> - либо адресс виртуальной машины, либо адресс вашей локальной машины
+
+> [!NOTE]
+> **Критерии оценки**:
+> * 3 балла - скриншот/видеозапись развернутого Prometheus 
+> * 2 балла - скриншот/видеозапись выполнить запрос базовых метрик, которые есть Prometheus
 
 > [!INFO]
-> Я просто скопипатил себя же [TBank URL-Shortener/prometheus](build/prometheus/prometheus.yml)
+> Написал базовый [prometheus.yml](build/prometheus/prometheus.yml)
 
 ```sh
 make up
@@ -131,7 +203,7 @@ minikube tunnel
 ```
 
 NB.
-Обязательно нужно чекнуть что это гавно поднялось:
+Обязательно нужно чекнуть что поднялось:
 ```sh
 kubectl exec -it имя_пода_с_oncall -- bash
 ```
@@ -154,13 +226,31 @@ cat /home/oncall/var/log/uwsgi/error.log | grep notifier
 
 
 ## 2 задание
+
+В предыдущих семинарах, мы разворачивали Oncall, в текущем задании нам надо разобраться как включить метрики Oncall и добавить их targetом в Prometheus.
+
+* Включить метрики в формате prometheus в приложении Oncall
+  * для этого придется пересобрать Dockerfile с установкой prometheus_client
+  * вытащить дополнительные порты в Deployment и Service
+  * прописать новый path в Ingress
+* Добавить адрес с метриками в target Prometheus prometheus.yml
+* Сделать запрос к метрикам Oncall
+
+> [!NOTE]
+> **Критерии оценки**:
+> * 1 балл - Показать/прислать конфигурацию, как включить метрики в Oncall
+> * 1 балл - Показать/прислать prometheus.yml
+> * 3 балла - Скриншот/видеозапись из Prometheus UI с запросом любой метрики из Oncall
+
+## Решение
+
 Включить метрики Oncall и добавить их targetом в Prometheus.
 
 Включить метрики в формате prometheus в приложении Oncall
+
 Меняем Dockerfile
-```Dockerfile
-```
-Смтоим как метрики используются, для модификаций кофигмапа
+
+Смотрим как метрики используются, для модификаций кофигмапа
 ```py
 # linkedin src/oncall/metrics
 config['prometheus'][appname]['server_port']
@@ -176,7 +266,7 @@ prometheus
 
 
 
-добавил CLUSTER-IP сервиса в етс хостс
+добавил CLUSTER-IP сервиса в `/etc/hosts`
 10.106.81.214
 
 Проверим что ингресс применился

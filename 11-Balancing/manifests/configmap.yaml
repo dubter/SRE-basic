@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: sticky-demo
+data:
+  default.conf: |
+    server {
+        listen 80;
+        location / {
+            add_header Content-Type text/plain;
+            return 200 "Server: $hostname\nDate: $time_local\n";
+        }
+    }
