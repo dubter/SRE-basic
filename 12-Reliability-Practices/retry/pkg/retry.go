@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"fmt"
@@ -7,8 +7,9 @@ import (
 	"time"
 )
 
+const maxRetries = 3
+
 func GetData(url string) (string, error) {
-	maxRetries := 3
 	var lastErr error
 
 	for i := 0; i < maxRetries; i++ {

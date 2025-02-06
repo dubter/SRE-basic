@@ -1,4 +1,4 @@
-package main
+package pkg
 
 import (
 	"fmt"
@@ -8,7 +8,11 @@ import (
 	"time"
 )
 
-// Состояния Circuit Breaker
+const (
+	openTimeout     = 10 * time.Second
+	maxFailureCount = 3
+)
+
 type State int
 
 const (
@@ -72,9 +76,9 @@ func GetDataWithCircuitBreaker(url string) (string, error) {
 	// Обработка ошибок
 	if isRetryable(resp.StatusCode) {
 		cb.failureCount++
-		if cb.failureCount >= 3 {
+		if cb.failureCount >= maxFailureCount {
 			cb.state = Open
-			cb.openTimeout = time.Now().Add(10 * time.Second)
+			cb.openTimeout = time.Now().Add(openTimeout)
 			fmt.Println("Circuit Breaker: CLOSED → OPEN (3 failures)")
 		}
 	} else {
