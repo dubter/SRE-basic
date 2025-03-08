@@ -1,0 +1,52 @@
+---
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Install apache2-utils for htpasswd
+  apt:
+    name: apache2-utils
+    state: present
+
+- name: Create .htpasswd file
+  copy:
+    content: "{{ htpasswd_content }}"
+    dest: /etc/nginx/.htpasswd
+    owner: www-data
+    group: www-data
+    mode: 0640
+  notify: restart nginx
+
+- name: Create virtual host configuration
+  template:
+    src: vhost.conf.j2
+    dest: /etc/nginx/sites-available/default
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart nginx
+
+- name: Create HTML directory
+  file:
+    path: /var/www/html
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0755
+
+- name: Create index.html from template
+  template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    owner: www-data
+    group: www-data
+    mode: 0644
+  notify: restart nginx
+
+- name: Enable and start Nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes

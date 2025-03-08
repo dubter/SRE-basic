@@ -1,0 +1,5 @@
+testing:
+  hosts:
+    testing-server:
+      ansible_host: 158.160.40.217
+      ansible_user: mvpshe

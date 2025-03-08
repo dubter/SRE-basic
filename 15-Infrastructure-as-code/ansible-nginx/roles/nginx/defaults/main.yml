@@ -1,0 +1,13 @@
+---
+# Базовые настройки Nginx
+nginx_port: 80
+nginx_worker_processes: 2
+nginx_worker_connections: 768
+
+# Параметры страницы
+your_name: "Гость"
+env_name: "неизвестное окружение"
+
+# Настройки аутентификации
+auth_enabled: true
+auth_realm: "Restricted Content"

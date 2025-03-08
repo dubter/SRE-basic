@@ -1,0 +1,5 @@
+production:
+  hosts:
+    prod-server:
+      ansible_host: 158.160.46.27
+      ansible_user: mvpshe
