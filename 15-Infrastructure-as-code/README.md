@@ -23,3 +23,10 @@
 Видео обзор на YouTube: 
 
 <a href="https://www.youtube.com/watch?v=fu2zMErs91c" title="rooms"><img src="https://i.ibb.co/hFmB3sms/2025-03-08-14-10-01.png" width="20%" alt="in-2" border="0" /></a> 
+
+## Запуск:
+
+```
+ansible-playbook -i inventory/production.yml site.yml
+ansible-playbook -i inventory/testing.yml site.yml
+```
