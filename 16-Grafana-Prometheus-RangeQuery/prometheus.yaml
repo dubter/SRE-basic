@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 15s      # Интервал сбора метрик с целей (по умолчанию 15 секунд)
+  evaluation_interval: 15s  # Интервал оценки правил (alerting и recording rules)
+  scrape_timeout: 10s       # Таймаут для сбора метрик
+  
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
