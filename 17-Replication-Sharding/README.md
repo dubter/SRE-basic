@@ -66,6 +66,7 @@
 
 ```
 # Добавлено в postgresql.conf на мастере
+max_wal_senders = 4
 wal_compression = on              # Сжатие WAL логов для оптимизации I/O
 max_wal_size = 1GB                # Увеличение размера WAL для снижения частоты чекпоинтов
 checkpoint_timeout = 15min        # Более редкие чекпоинты
