@@ -17,12 +17,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '1.0'
+          memory: 512M    
 
   postgres-replica1:
     build: ./replica
     container_name: postgres-replica1
     environment:
       POSTGRES_PASSWORD: postgres
+      PGPASSWORD: replicator_password
     volumes:
       - postgres_replica1_data:/var/lib/postgresql/data
     entrypoint: ["/entrypoint.sh"]
@@ -34,14 +43,15 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'   # Ограничение CPU
-          memory: 256M  # Ограничение памяти
+          cpus: '1.0'   # Ограничение CPU
+          memory: 512M  # Ограничение памяти
 
   postgres-replica2:
     build: ./replica
     container_name: postgres-replica2
     environment:
       POSTGRES_PASSWORD: postgres
+      PGPASSWORD: replicator_password
     volumes:
       - postgres_replica2_data:/var/lib/postgresql/data
     entrypoint: ["/entrypoint.sh"]
@@ -53,8 +63,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'   # Ограничение CPU
-          memory: 256M  # Ограничение памяти
+          cpus: '1.0'   # Ограничение CPU
+          memory: 512M  # Ограничение памяти
 
 volumes:
   postgres_master_data:
